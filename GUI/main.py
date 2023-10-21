@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 import sqlite3
+import database
 
 root = ctk.CTk()
 ctk.set_appearance_mode('dark')
@@ -8,7 +9,7 @@ ctk.set_default_color_theme('green')
 
 font1 = ('Times New Roman', 16)
 
-root.geometry("800x800")
+root.geometry("1920x1080")
 
 root.title("Profit Loss Calculator")
 

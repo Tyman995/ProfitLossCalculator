@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 import sqlite3
+import db
 
 root = ctk.CTk()
 ctk.set_appearance_mode('dark')

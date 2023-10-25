@@ -17,7 +17,7 @@ def createTable():
     connector.commit()
     connector.close()
 
-def insertValues(type, amt, date, op):
+def insertValues():
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
 
@@ -28,5 +28,6 @@ def insertValues(type, amt, date, op):
     connector.close()
 createTable()
 insertValues()
-                   
+
+#type, amt, date, op        <- For insert paramaters when ready
 #VALUES({y}, {amt}, {date}, {op})''')

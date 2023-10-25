@@ -23,7 +23,8 @@ def insertValues():
 
     cursor.execute('''
         INSERT INTO Transactions(t_type, amount, date, note)
-        VALUES('Revanue', 95.23, 2023-02-02, 'test2')''')
+        VALUES('Revanue', 95.23, '2023-02-02', 'test2')''')
+    #ensure date gets passed as a string to prevent numeric type from doing calculations such as subtraction
     connector.commit()
     connector.close()
 createTable()

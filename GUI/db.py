@@ -20,7 +20,6 @@ def createTable():
 def insert_transaction(t, n, d, a):
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
-
     cursor.execute('''
         INSERT INTO Transactions(t_type, note, date, amount)
         VALUES(?, ?, ?, ?)''',(t,n,d,a)) 

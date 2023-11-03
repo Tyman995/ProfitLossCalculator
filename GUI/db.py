@@ -1,5 +1,5 @@
 import sqlite3
-
+import pandas as pd
 #Test Creating a DB 
 
 def createTable():
@@ -42,14 +42,41 @@ def delete_transaction(tid):
     connector.close()
 
 def fetch_transactions():
-    conn = sqlite3.connect('ProfitLoss.db')
-    cursor = conn.cursor()
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
     cursor.execute('SELECT * FROM Transactions')
     transactions = cursor.fetchall()
-    conn.close()
+    connector.close()
     return transactions
 
-createTable()
+def calc_total_expense():
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Expense'")
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
 
-#type, amt, date, op        <- For insert paramaters when ready
-#VALUES({y}, {amt}, {date}, {op})''')
+def calc_total_revenue():
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Revenue'")
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
+
+def calc_total():
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions")
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
+def save_as_csv():
+    connector = sqlite3.connect("ProfitLoss.db")
+    df = pd.read_sql("SELECT * From Transactions", connector)
+    df.to_csv("Output.csv", index=False)
+createTable()

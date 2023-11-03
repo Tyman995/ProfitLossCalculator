@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk, messagebox
 import sqlite3
 import db
+
 root = ctk.CTk()
 ctk.set_appearance_mode('dark')
 ctk.set_default_color_theme('blue')
@@ -11,6 +12,8 @@ ctk.set_default_color_theme('blue')
 font1 = ('Heebo', 16, 'bold')
 font2 = ('Heebo', 13, 'bold')
 font3 = ('Heebo', 10)
+font4 = ('Heebo', 18, 'bold')
+
 
 root.geometry("1200x600")
 root.title("Profit Loss Calculator")
@@ -28,8 +31,8 @@ def a_command():
 def file_new():
     pass
 def file_save():
-    pass
-
+    db.save_as_csv()
+    messagebox.showinfo('Success', 'Output CSV file created')
 #create menu items
 file_menu = Menu(my_menu)
 my_menu.add_cascade(label="File", menu=file_menu)
@@ -65,6 +68,7 @@ def insert_button():
     else:
         db.insert_transaction(t_type, note, date, amount)
         add_db_to_tree()
+        results_display()
         messagebox.showinfo('Success','Transaction has been added.')
 
 def update_button():
@@ -78,10 +82,20 @@ def update_button():
         amount = amt_entry.get()
         r = money_tree.item(select)['values']
         tid = r[0]
-        db.update_transaction(t_type,note,date,amount, tid)
-        add_db_to_tree()
-        clear_field()
-        messagebox.showinfo('Success', 'Transaction has been updated.')
+        if(note == NONE):
+            note = ""
+        if not(t_type and date and amount):
+            messagebox.showerror('Error','Transaction type, date, and amount must have a value.')
+        if (t_type == "Revenue" and float(amount) < 0):
+            messagebox.showerror('Error', 'Revenue cannot have a negative amount')
+        elif (t_type == "Expense" and float(amount) > 0):
+            messagebox.showerror('Error', 'Expense cannot have a positive amount')
+        else:
+            db.update_transaction(t_type,note,date,amount, tid)
+            add_db_to_tree()
+            clear_field()
+            results_display()
+            messagebox.showinfo('Success', 'Transaction has been updated.')
 
 def delete_button():
     select = money_tree.focus()
@@ -93,6 +107,7 @@ def delete_button():
         db.delete_transaction(tid)
         add_db_to_tree()
         clear_field()
+        results_display()
         messagebox.showinfo('Success', 'Transaction has been deleted.')
 
 #This function will clear the fields currently filled with values
@@ -117,7 +132,34 @@ def display_selected(event):
         amt_entry.insert(0, r[4])
     else:#not clicking on a db row
         pass
-  
+
+#Total Rev/Expense/NetProfitLoss
+def results_display():
+    total_expense = round(db.calc_total_expense()[0], 2)
+    total_revenue = round(db.calc_total_revenue()[0], 2)
+    total_expense_label = ctk.CTkLabel(root, font=font4, text='Total Expenses: ')
+    total_expense_label.place(x=480,y=420)
+    total_expense_result = ctk.CTkLabel(root, font=font4, text_color='red', text=total_expense)
+    total_expense_result.place(x=970,y=420)
+    total_revenue_label = ctk.CTkLabel(root, font=font4, text='Total Revenue: ')
+    total_revenue_label.place(x=480,y=480)
+    total_revenue_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{total_revenue}")
+    total_revenue_result.place(x=970,y=480)
+    #net profit/loss calculation
+    net = round(db.calc_total()[0], 2)
+    if(net >= 0.0):
+        net_profit_label = ctk.CTkLabel(root, font=font4, text="Net Profit: ")
+        net_profit_label.place(x=480,y=540)
+        net_profit_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{(net)}")
+        net_profit_result.place(x=970,y=540)
+    else:
+        net_loss_label = ctk.CTkLabel(root, font=font4, text="Net Loss: ")
+        net_loss_label.place(x=480,y=540)
+        net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=(net))
+        net_loss_result.place(x=970,y=540)
+    
+    
+
 t_type_label = ctk.CTkLabel(root, font=font1, text='Transaction Type: ')
 t_type_label.place(x=20,y=20)
 
@@ -183,4 +225,5 @@ money_tree.bind('<ButtonRelease>', display_selected)
 #adds the db values into the tree view
 add_db_to_tree()
 
+results_display()
 root.mainloop()

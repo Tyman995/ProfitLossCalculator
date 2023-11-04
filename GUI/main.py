@@ -49,31 +49,7 @@ def search_db():
     transactions = db.search_query(lookup_transaction)
     for transaction in transactions:
         money_tree.insert('',END, values=transaction)
-    try:
-        total_expense_result.destroy()
-    except:
-        pass
-    try:
-        total_revenue_result.destroy()
-    except:
-        pass
-    try:
-        net_profit_label.destroy()
-    except:
-        pass
-    try:
-        net_profit_result.destroy()
-    except:
-        pass
-    try:
-        net_loss_label.destroy()
-    except:
-        pass
-    try:
-        net_loss_result.destroy()
-    except:
-        pass
-    
+    remove_labels()
     search_results_display(lookup_transaction)
 
 def lookup_transactions():
@@ -96,30 +72,7 @@ def lookup_transactions():
 
 def reset_tree():
     add_db_to_tree()
-    try:
-        total_expense_result.destroy()
-    except:
-        pass
-    try:
-        total_revenue_result.destroy()
-    except:
-        pass
-    try:
-        net_profit_label.destroy()
-    except:
-        pass
-    try:
-        net_profit_result.destroy()
-    except:
-        pass
-    try:
-        net_loss_label.destroy()
-    except:
-        pass
-    try:
-        net_loss_result.destroy()
-    except:
-        pass
+    remove_labels()
     results_display()
     
 #create menu items
@@ -162,30 +115,7 @@ def insert_button():
     else:
         db.insert_transaction(t_type, note, date, amount)
         add_db_to_tree()
-        try:
-            total_expense_result.destroy()
-        except:
-            pass
-        try:
-            total_revenue_result.destroy()
-        except:
-            pass
-        try:
-            net_profit_label.destroy()
-        except:
-            pass
-        try:
-            net_profit_result.destroy()
-        except:
-            pass
-        try:
-            net_loss_label.destroy()
-        except:
-            pass
-        try:
-            net_loss_result.destroy()
-        except:
-            pass
+        remove_labels()
         results_display()
         messagebox.showinfo('Success','Transaction has been added.')
 
@@ -212,30 +142,7 @@ def update_button():
             db.update_transaction(t_type,note,date,amount, tid)
             add_db_to_tree()
             clear_field()
-            try:
-                total_expense_result.destroy()
-            except:
-                pass
-            try:
-                total_revenue_result.destroy()
-            except:
-                pass
-            try:
-                net_profit_label.destroy()
-            except:
-                pass
-            try:
-                net_profit_result.destroy()
-            except:
-                pass
-            try:
-                net_loss_label.destroy()
-            except:
-                pass
-            try:
-                net_loss_result.destroy()
-            except:
-                pass
+            remove_labels()
             results_display()
             messagebox.showinfo('Success', 'Transaction has been updated.')
 
@@ -249,30 +156,7 @@ def delete_button():
         db.delete_transaction(tid)
         add_db_to_tree()
         clear_field()
-        try:
-            total_expense_result.destroy()
-        except:
-            pass
-        try:
-            total_revenue_result.destroy()
-        except:
-            pass
-        try:
-            net_profit_label.destroy()
-        except:
-            pass
-        try:
-            net_profit_result.destroy()
-        except:
-            pass
-        try:
-            net_loss_label.destroy()
-        except:
-            pass
-        try:
-            net_loss_result.destroy()
-        except:
-            pass
+        remove_labels()
         results_display()
         messagebox.showinfo('Success', 'Transaction has been deleted.')
 
@@ -384,6 +268,31 @@ def get_date():
 t_type_label = ctk.CTkLabel(root, font=font1, text='Transaction Type: ')
 t_type_label.place(x=20,y=20)
 
+def remove_labels():
+        try:
+            total_expense_result.destroy()
+        except:
+            pass
+        try:
+            total_revenue_result.destroy()
+        except:
+            pass
+        try:
+            net_profit_label.destroy()
+        except:
+            pass
+        try:
+            net_profit_result.destroy()
+        except:
+            pass
+        try:
+            net_loss_label.destroy()
+        except:
+            pass
+        try:
+            net_loss_result.destroy()
+        except:
+            pass
 #variables for entry menu
 op1 = "Revenue"
 op2 = "Expense"

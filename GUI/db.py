@@ -12,7 +12,7 @@ def createTable():
         t_type TEXT,
         note TEXT,
         date DATE,
-        amount REAL)''')
+        amount DECIMAL)''')
     
     connector.commit()
     connector.close()
@@ -49,6 +49,43 @@ def fetch_transactions():
     connector.close()
     return transactions
 
+def search_query(lookup_transaction):
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute('SELECT * FROM Transactions WHERE t_type LIKE ? or note LIKE ? or date LIKE ?', (lookup_transaction, lookup_transaction, lookup_transaction,))
+    transactions = cursor.fetchall()
+    connector.close()
+    return transactions
+
+def search_calc_total_expense(lookup_transaction):
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Expense' and note LIKE ? or date LIKE ?",(lookup_transaction, lookup_transaction))
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
+
+def search_calc_total_revenue(lookup_transaction):
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Revenue' and note LIKE ? or date LIKE ?",(lookup_transaction, lookup_transaction))
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
+
+def search_calc_total(lookup_transaction):
+    connector = sqlite3.connect('ProfitLoss.db')
+    cursor = connector.cursor()
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type LIKE ? or note LIKE ? or date LIKE ?", (lookup_transaction, lookup_transaction, lookup_transaction,))
+    total_amount = cursor.fetchone()
+    connector.commit()
+    connector.close()
+    return total_amount
+
+#--------------------------------------------------
+
 def calc_total_expense():
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
@@ -75,8 +112,10 @@ def calc_total():
     connector.commit()
     connector.close()
     return total_amount
+
 def save_as_csv():
     connector = sqlite3.connect("ProfitLoss.db")
     df = pd.read_sql("SELECT * From Transactions", connector)
     df.to_csv("Output.csv", index=False)
+
 createTable()

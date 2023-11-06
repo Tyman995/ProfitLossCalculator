@@ -21,7 +21,10 @@ font5 = ('Heebo', 18)
 root.geometry("1200x600")
 root.title("Profit Loss Calculator")
 root.resizable(False,False)
-
+try:
+    root.iconbitmap(r"../NetProfitLossCalculator/ProfitLossCalculator/GUI/jbns.ico")
+except:
+    pass
 #Menus
 
 my_menu = Menu(root)

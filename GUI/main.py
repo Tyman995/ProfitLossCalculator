@@ -6,6 +6,7 @@ from tkcalendar import *
 import sqlite3
 import db
 import pandas as pd
+import re
 
 root = ctk.CTk()
 ctk.set_appearance_mode('dark')
@@ -40,12 +41,13 @@ def file_save():
     messagebox.showinfo('Success', 'Output CSV file created')
 
 def search_db():
-    lookup_transaction = search_entry.get()
+    lookup_transaction = search_entry.get().upper()
     #close search
     search.destroy()
     #clear treeview
     for transaction in money_tree.get_children():
         money_tree.delete(transaction)
+        
     transactions = db.search_query(lookup_transaction)
     for transaction in transactions:
         money_tree.insert('',END, values=transaction)
@@ -102,19 +104,20 @@ def add_db_to_tree():
 #This function is used by the add transaction button to add the variable fields into the db
 def insert_button():
     t_type = t_type_option_menu_entry.get()
+    check = check_entry.get()
     note = note_entry.get().upper()
     date = date_entry.get()
     amount = amt_entry.get()
     if(note == NONE):
         note = ""
-    if not(t_type and date and amount):
-        messagebox.showerror('Error','Transaction type, date, and amount must have a value.')
+    if not(t_type and date and amount and check):
+        messagebox.showerror('Error','Transaction type, check #, date, and amount must have a value.')
     elif (t_type == "Revenue" and float(amount) < 0):
         messagebox.showerror('Error', 'Revenue cannot have a negative amount')
     elif (t_type == "Expense" and float(amount) > 0):
         messagebox.showerror('Error', 'Expense cannot have a positive amount')
     else:
-        db.insert_transaction(t_type, note, date, amount)
+        db.insert_transaction(t_type, check, note, date, amount)
         add_db_to_tree()
         remove_labels()
         results_display()
@@ -126,6 +129,7 @@ def update_button():
         messagebox.showerror('Error', 'Select a transaction to update.')
     else:
         t_type = t_type_option_menu_entry.get()
+        check = check_entry.get()
         note = note_entry.get().upper()
         date = date_entry.get()
         amount = amt_entry.get()
@@ -133,14 +137,14 @@ def update_button():
         tid = r[0]
         if(note == NONE):
             note = ""
-        if not(t_type and date and amount):
-            messagebox.showerror('Error','Transaction type, date, and amount must have a value.')
+        if not(t_type and date and amount and check):
+            messagebox.showerror('Error','Transaction type, check #, date, and amount must have a value.')
         if (t_type == "Revenue" and float(amount) < 0):
             messagebox.showerror('Error', 'Revenue cannot have a negative amount')
         elif (t_type == "Expense" and float(amount) > 0):
             messagebox.showerror('Error', 'Expense cannot have a positive amount')
         else:
-            db.update_transaction(t_type,note,date,amount, tid)
+            db.update_transaction(t_type,check,note,date,amount,tid)
             add_db_to_tree()
             clear_field()
             remove_labels()
@@ -167,6 +171,7 @@ def clear_field(*clicked):
         money_tree.selection_remove(money_tree.focus())
         money_tree.focus('')
     t_type_option_menu_entry.set(op1)
+    check_entry.delete(0,END)
     note_entry.delete(0,END)
     date_entry.delete(0,END)
     amt_entry.delete(0,END)
@@ -178,9 +183,10 @@ def display_selected(event):
         r = money_tree.item(select)['values']
         clear_field()
         t_type_option_menu_entry.set(r[1])
-        note_entry.insert(0, r[2])
-        date_entry.insert(0, r[3])
-        amt_entry.insert(0, r[4])
+        check_entry.insert(0, r[2])
+        note_entry.insert(0, r[3])
+        date_entry.insert(0, r[4])
+        amt_entry.insert(0, r[5])
     else:#not clicking on a db row
         pass
 
@@ -256,7 +262,7 @@ def pick_date(event):
     d_w.grab_set()
     d_w.title("Select date")
     d_w.geometry("250x220+590+370")
-    cal = Calendar(d_w, selectmode="day", date_pattern="mm-dd-y", background='#1c6cac')
+    cal = Calendar(d_w, selectmode="day", year= 2023, month=1, day=1, date_pattern="mm-dd-y", background='#1c6cac')
     cal.place(x=0, y=0)
     cal_button = ctk.CTkButton(d_w, text="Submit", command=get_date)
     cal_button.place(x=55, y=189)
@@ -301,14 +307,19 @@ t_type_option_menu_entry = ctk.CTkOptionMenu(root, values=[op1,op2])
 t_type_option_menu_entry.place(x=225, y=20)
 
 note_label = ctk.CTkLabel(root, font=font1, text='Name (Optional): ')
-note_label.place(x=20,y=120)
+note_label.place(x=20,y=95)
 note_entry = ctk.CTkEntry(root)
-note_entry.place(x=225,y=120)
+note_entry.place(x=225,y=95)
+
+check_label = ctk.CTkLabel(root, font=font1, text='Check Number: ')
+check_label.place(x=20, y=170)
+check_entry = ctk.CTkEntry(root)
+check_entry.place(x=225, y=170)
 
 date_label = ctk.CTkLabel(root, font=font1, text='Transaction Date: ')
-date_label.place(x=20,y=220)
+date_label.place(x=20,y=245)
 date_entry = ctk.CTkEntry(root, placeholder_text="mm-dd-yyyy")
-date_entry.place(x=225, y=220)
+date_entry.place(x=225, y=245)
 date_entry.bind("<1>", pick_date)
 
 amount_label = ctk.CTkLabel(root, font=font1, text='Amount: ')
@@ -335,19 +346,21 @@ style.map('Treeview', background=[('selected','lightblue')], foreground=[('selec
 money_tree = ttk.Treeview(root, height=12)
 
 #column def
-money_tree['columns'] = ('T_id', 'T_Type', 'Note', 'Date', 'Amount')
+money_tree['columns'] = ('T_id', 'T_Type', 'Check #', 'Note', 'Date', 'Amount')
 
 #format columns
 money_tree.column('#0', width=0, stretch=tk.NO) #hide the default phantom column
 money_tree.column('T_id', anchor=tk.CENTER, width=60)
 money_tree.column('T_Type', anchor=tk.CENTER, width=120)
-money_tree.column('Note', anchor=tk.CENTER, width=120)
-money_tree.column('Date', anchor=tk.CENTER, width=120)
-money_tree.column('Amount', anchor=tk.CENTER, width=200)
+money_tree.column('Check #', anchor=tk.CENTER, width=100)
+money_tree.column('Note', anchor=tk.CENTER, width=100)
+money_tree.column('Date', anchor=tk.CENTER, width=100)
+money_tree.column('Amount', anchor=tk.CENTER, width=180)
 
 #heading of coulumn
 money_tree.heading('T_id', text='Tid')
 money_tree.heading('T_Type', text='Transaction Type')
+money_tree.heading('Check #', text='Check #')
 money_tree.heading('Note', text='Name')
 money_tree.heading('Date', text='Date')
 money_tree.heading('Amount', text='Transaction Amount')

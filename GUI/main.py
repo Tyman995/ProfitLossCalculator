@@ -225,6 +225,7 @@ def results_display():
         net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{(net)}")
         net_loss_result.place(x=970,y=540)
 
+#Total Rev/Expense/NetProfitLoss for a searched value
 def search_results_display(lookup_transaction):
     global total_expense_result, total_revenue_result, total_expense_label, total_revenue_label, net_loss_label, net_loss_result, net_profit_label, net_profit_result
     try:

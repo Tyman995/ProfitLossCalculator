@@ -54,7 +54,7 @@ def fetch_transactions():
 def search_query(lookup_transaction):
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
-    cursor.execute('''SELECT * FROM Transactions WHERE t_type LIKE ? or check_id LIKE ? or note LIKE '%' || ? || '%' or date LIKE ?''', (lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction,))
+    cursor.execute('''SELECT * FROM Transactions WHERE t_type LIKE ? or check_id LIKE ? or note LIKE '%' || ? || '%' or date LIKE ? or amount = ?''', (lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction))
     transactions = cursor.fetchall()
     connector.close()
     return transactions
@@ -62,7 +62,7 @@ def search_query(lookup_transaction):
 def search_calc_total_expense(lookup_transaction):
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
-    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Expense' and note LIKE '%' || ? || '%' or check_id LIKE ?  or date LIKE ?",(lookup_transaction, lookup_transaction, lookup_transaction))
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Expense' and (note LIKE '%' || ? || '%' or check_id LIKE ?  or date LIKE ? or amount = ? or t_type LIKE ?)",(lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction))
     total_amount = cursor.fetchone()
     connector.commit()
     connector.close()
@@ -71,7 +71,7 @@ def search_calc_total_expense(lookup_transaction):
 def search_calc_total_revenue(lookup_transaction):
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
-    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Revenue' and note LIKE '%' || ? || '%' or check_id LIKE ?  or date LIKE ?",(lookup_transaction, lookup_transaction, lookup_transaction))
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE t_type = 'Revenue' and (note LIKE '%' || ? || '%' or check_id = ?  or date LIKE ? or amount = ? or t_type LIKE ?)",(lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction,))
     total_amount = cursor.fetchone()
     connector.commit()
     connector.close()
@@ -80,7 +80,7 @@ def search_calc_total_revenue(lookup_transaction):
 def search_calc_total(lookup_transaction):
     connector = sqlite3.connect('ProfitLoss.db')
     cursor = connector.cursor()
-    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE note LIKE '%' || ? || '%' or t_type LIKE ? or check_id LIKE ? or date LIKE ?", (lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction,))
+    cursor.execute("SELECT SUM(amount) FROM Transactions WHERE note LIKE '%' || ? || '%' or t_type LIKE ? or check_id = ? or date LIKE ? or amount = ?", (lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction, lookup_transaction,))
     total_amount = cursor.fetchone()
     connector.commit()
     connector.close()

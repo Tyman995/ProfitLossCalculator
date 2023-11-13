@@ -344,7 +344,19 @@ style.configure("Treeview", font=font2, background="lightgray", foreground="#051
 style.configure("Treeview.Heading", font=font3, background="#1c6cac",foreground="white", relief=FLAT)
 style.configure("Treeview.")
 style.map('Treeview', background=[('selected','lightblue')], foreground=[('selected','gray')])
-money_tree = ttk.Treeview(root, height=12)
+#Tree View Frame
+tree_frame = Frame(root)
+tree_frame.place(x=480, y=20)
+
+#Scrollbar
+scrollbar = Scrollbar(tree_frame)
+scrollbar.pack(side=RIGHT, fill=Y)
+
+#Tree View Creation
+money_tree = ttk.Treeview(tree_frame, yscrollcommand=scrollbar.set)
+
+#config Scrollbar
+scrollbar.config(command=money_tree.yview)
 
 #column def
 money_tree['columns'] = ('T_id', 'T_Type', 'Check #', 'Note', 'Date', 'Amount')
@@ -365,7 +377,7 @@ money_tree.heading('Check #', text='Check #')
 money_tree.heading('Note', text='Name')
 money_tree.heading('Date', text='Date')
 money_tree.heading('Amount', text='Transaction Amount')
-money_tree.place(x=480, y=20)
+money_tree.pack()
 money_tree.bind('<ButtonRelease>', display_selected)
 
 #adds the db values into the tree view

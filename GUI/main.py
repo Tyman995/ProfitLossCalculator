@@ -353,7 +353,7 @@ scrollbar = Scrollbar(tree_frame)
 scrollbar.pack(side=RIGHT, fill=Y)
 
 #Tree View Creation
-money_tree = ttk.Treeview(tree_frame, yscrollcommand=scrollbar.set)
+money_tree = ttk.Treeview(tree_frame, yscrollcommand=scrollbar.set, height=12)
 
 #config Scrollbar
 scrollbar.config(command=money_tree.yview)

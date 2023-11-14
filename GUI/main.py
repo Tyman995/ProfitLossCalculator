@@ -3,10 +3,9 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk, messagebox
 from tkcalendar import *
-import sqlite3
 import db
 import pandas as pd
-import re
+
 
 root = ctk.CTk()
 ctk.set_appearance_mode('dark')
@@ -50,7 +49,11 @@ def search_db():
         
     transactions = db.search_query(lookup_transaction)
     for transaction in transactions:
-        money_tree.insert('',END, values=transaction)
+        whole_transaction = list(transaction[0:6])
+        format_amount = format(whole_transaction[5], '.2f')
+        del whole_transaction[5]
+        whole_transaction.append(format_amount)
+        money_tree.insert('',END, values=whole_transaction)
     remove_labels()
     search_results_display(lookup_transaction)
 
@@ -98,8 +101,13 @@ my_menu.add_command(label="Reset", command=reset_tree)
 def add_db_to_tree():
     transactions = db.fetch_transactions()
     money_tree.delete(*money_tree.get_children()) #prevent entering same row multiple times
+    
     for transaction in transactions:
-        money_tree.insert('',END, values=transaction)
+        whole_transaction = list(transaction[0:6])
+        format_amount = format(whole_transaction[5], '.2f')
+        del whole_transaction[5]
+        whole_transaction.append(format_amount)
+        money_tree.insert('',END, values=whole_transaction)
 
 #This function is used by the add transaction button to add the variable fields into the db
 def insert_button():
@@ -203,12 +211,12 @@ def results_display():
         total_revenue = 0
     total_expense_label = ctk.CTkLabel(root, font=font4, text='Total Expenses: ')
     total_expense_label.place(x=480,y=420)
-    total_expense_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{total_expense}")
-    total_expense_result.place(x=970,y=420)
+    total_expense_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{format(total_expense,'.2f')}")
+    total_expense_result.place(x=1050,y=420)
     total_revenue_label = ctk.CTkLabel(root, font=font4, text='Total Revenue: ')
     total_revenue_label.place(x=480,y=480)
-    total_revenue_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{total_revenue}")
-    total_revenue_result.place(x=970,y=480)
+    total_revenue_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{format(total_revenue,'.2f')}")
+    total_revenue_result.place(x=1050,y=480)
     #net profit/loss calculation
     try:
         net = round(db.calc_total()[0], 2)
@@ -217,13 +225,13 @@ def results_display():
     if(net >= 0.0):
         net_profit_label = ctk.CTkLabel(root, font=font4, text="Net Profit: ")
         net_profit_label.place(x=480,y=540)
-        net_profit_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{(net)}")
-        net_profit_result.place(x=970,y=540)
+        net_profit_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{format((net), '.2f')}")
+        net_profit_result.place(x=1050,y=540)
     else:
         net_loss_label = ctk.CTkLabel(root, font=font4, text="Net Loss: ")
         net_loss_label.place(x=480,y=540)
-        net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{(net)}")
-        net_loss_result.place(x=970,y=540)
+        net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{format((net), '.2f')}")
+        net_loss_result.place(x=1050,y=540)
 
 #Total Rev/Expense/NetProfitLoss for a searched value
 def search_results_display(lookup_transaction):
@@ -236,10 +244,10 @@ def search_results_display(lookup_transaction):
         total_revenue = round(db.search_calc_total_revenue(lookup_transaction)[0], 2)
     except:
         total_revenue = 0
-    total_expense_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{total_expense}")
-    total_expense_result.place(x=970,y=420)
-    total_revenue_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{total_revenue}")
-    total_revenue_result.place(x=970,y=480)
+    total_expense_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{format(total_expense,'.2f')}")
+    total_expense_result.place(x=1050,y=420)
+    total_revenue_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{format(total_revenue,'.2f')}")
+    total_revenue_result.place(x=1050,y=480)
     #net profit/loss calculation
     try:
         net = round(db.search_calc_total(lookup_transaction)[0], 2)
@@ -248,13 +256,13 @@ def search_results_display(lookup_transaction):
     if(net >= 0.0):
         net_profit_label = ctk.CTkLabel(root, font=font4, text="Net Profit: ")
         net_profit_label.place(x=480,y=540)
-        net_profit_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{(net)}")
-        net_profit_result.place(x=970,y=540)
+        net_profit_result = ctk.CTkLabel(root, font=font4, text_color='green', text=f"+{format((net), '.2f')}")
+        net_profit_result.place(x=1050,y=540)
     else:
         net_loss_label = ctk.CTkLabel(root, font=font4, text="Net Loss: ")
         net_loss_label.place(x=480,y=540)
-        net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{(net)}")
-        net_loss_result.place(x=970,y=540)
+        net_loss_result = ctk.CTkLabel(root, font=font4, text_color='red', text=f"{format((net), '.2f')}")
+        net_loss_result.place(x=1050,y=540)
     
     #calendar functions
 def pick_date(event):
@@ -368,7 +376,7 @@ money_tree.column('T_Type', anchor=tk.CENTER, width=120)
 money_tree.column('Check #', anchor=tk.CENTER, width=100)
 money_tree.column('Note', anchor=tk.CENTER, width=100)
 money_tree.column('Date', anchor=tk.CENTER, width=100)
-money_tree.column('Amount', anchor=tk.CENTER, width=180)
+money_tree.column('Amount', anchor=tk.E, width=180)
 
 #heading of coulumn
 money_tree.heading('T_id', text='Tid')

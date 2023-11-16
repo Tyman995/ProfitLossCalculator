@@ -56,7 +56,6 @@ def search_db():
         money_tree.insert('',END, values=whole_transaction)
     remove_labels()
     search_results_display(lookup_transaction)
-#gittest
 
 def lookup_transactions():
     global search_entry, search
